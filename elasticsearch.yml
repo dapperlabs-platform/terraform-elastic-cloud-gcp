@@ -1,0 +1,5 @@
+# Provides anonymous access to the elasticsearch cluster, i.e. access to the cluster without username/password. Anonymous users will take on the role of `anonymous role`. For private clusters, this role is defined and provides limited capabilities. For public clusters, this role is not defined and thus anonymous access is not possible.
+xpack.security.authc:
+  anonymous:
+    roles: anonymous_role
+    authz_exception: true
