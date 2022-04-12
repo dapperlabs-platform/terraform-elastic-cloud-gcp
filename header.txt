@@ -1,0 +1,84 @@
+# Elasticsearch
+
+## What does this do?
+
+Creates an Elastic Cloud Deployment with traffic filter rules to only allow traffic from Dapper VPNs and the VPC of the accompanying GCP project.
+
+## How to use this module?
+
+You can always refer to the [Notion doc](https://www.notion.so/dapperlabs/Deploy-an-Elastic-Cloud-Deployment-7185333a542341ba9faf18da5b9a97c1) for more info.
+
+1. Add the module with every variable you want to set except for the `private_service_connect_id` variable and make/merge a PR with these settings.
+    * If you are deploying to a Gen 2 project, be sure to set the variable `project_name`.
+2. Follow the steps [here](https://cloud.google.com/vpc/docs/configure-private-service-connect-services#create-endpoint) to create a Private Service Connect endpoint in the proper GCP project.
+    * For `target` please select `Published Service` from the radio buttons
+    * For `target service` use the corresponding URI from [this](https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-psc.html#ec-private-service-connect-uris) page depending on the region of the project.
+    * For `endpoint name` please use the naming convention `<GCP_PROJECT_NAME>-psc`. ex: `dl-sre-staging-psc`
+    * For `subnetwork` please select `gke` from the dropdown (will probably be the only option)
+    * For `IP address` select `<GCP_PROJECT_NAME>-psc-address` from the dropdown (will probably be the only option)
+    * For `service directory` please do NOT choose a namespace as this will place the PSC in the default namespace (which is the desired bahavior)
+3. Once the private service connect is created, grab the PSC Connection ID and update the `private_service_connect_id` variable in the module and raise a second PR with these updates.
+
+### Usage Examples
+
+#### Regular Use
+```hcl
+module "elasticsearch" {
+  source     = "git@github.com:dapperlabs/terraform-modules.git//elasticsearch?ref=<VERSION>"
+  project_id = module.project.project_id
+  region     = var.default_region
+
+  // private_service_connect_id = "<PRIVATE_SERVICE_CONNECT_ID>" # Uncomment this after manually creating Private Service Connect
+}
+```
+
+#### Gen 2 Use Example
+```hcl
+module "elasticsearch" {
+  source       = "git@github.com:dapperlabs/terraform-modules.git//elasticsearch?ref=<VERSION>"
+  project_id   = module.project.project_id
+  project_name = "nba-staging"
+  region       = var.default_region
+
+  // private_service_connect_id = "<PRIVATE_SERVICE_CONNECT_ID>" # Uncomment this after manually creating Private Service Connect
+}
+```
+
+#### Custom Elastic Deployment Needs
+```hcl
+module "elasticsearch" {
+  source     = "git@github.com:dapperlabs/terraform-modules.git//elasticsearch?ref=<VERSION>"
+  project_id = module.project.project_id
+  region     = var.default_region
+
+	elastic_topology = [
+    {
+      id         = "hot_content"
+      size       = "16g"
+      zone_count = 6
+      autoscaling = {
+        max_size = "128g"
+      }
+    },
+		{
+      id         = "cold"
+      size       = "1g"
+      zone_count = 2
+      autoscaling = {
+        max_size = "16g"
+      }
+    }
+  ]
+
+  // private_service_connect_id = "<PRIVATE_SERVICE_CONNECT_ID>" # Uncomment this after manually creating Private Service Connect
+}
+```
+
+## Updating this module
+`make` updates the `README.md` file based on Terraform changes.
+
+## Requires
+
+1. `terraform` [Download](https://www.terraform.io/downloads.html) [Brew](https://formulae.brew.sh/formula/terraform)
+2. `terraform-docs` to update the README. [Download](https://github.com/terraform-docs/terraform-docs) [Brew](https://formulae.brew.sh/formula/terraform-docs)
+3. `make` to update the README. [Download](https://www.gnu.org/software/make/)
