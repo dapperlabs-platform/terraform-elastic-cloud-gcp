@@ -6,9 +6,8 @@ resource "ec_deployment" "elastic_cloud_deployment" {
   deployment_template_id = var.elastic_deployment_template_name
 
   traffic_filter = var.make_public ? null : [
-    ec_deployment_traffic_filter.filter_vpn_ips[0].id,
+    ec_deployment_traffic_filter.filter_allowed_ips[0].id,
     ec_deployment_traffic_filter.filter_gcp_psc[0].id,
-    ec_deployment_traffic_filter.filter_atlantis_ips[0].id,
   ]
 
   elasticsearch {
@@ -23,9 +22,11 @@ resource "ec_deployment" "elastic_cloud_deployment" {
         }
       }
     }
-
-    config {
-      user_settings_yaml = file("${path.module}/elasticsearch.yml")
+    dynamic "config" {
+      for_each = var.enable_anonymous_access && !var.make_public ? [1] : []
+      content {
+        user_settings_yaml = file("${path.module}/elasticsearch.yml")
+      }
     }
   }
 
@@ -40,16 +41,16 @@ resource "ec_deployment" "elastic_cloud_deployment" {
   }
 }
 
-# Filter rule to allow requests from Dapper VPN IPs
-resource "ec_deployment_traffic_filter" "filter_vpn_ips" {
+# Filter rule to allow requests from allowed IPs
+resource "ec_deployment_traffic_filter" "filter_allowed_ips" {
   count = var.make_public ? 0 : 1
 
-  name   = var.project_name == null ? "${var.project_id} - VPN Traffic Filter Rules" : "${var.project_name} - VPN Traffic Filter Rules"
+  name   = var.project_name == null ? "${var.project_id} - Allowed IPs Filter Rule" : "${var.project_name} - Allowed IPs Filter Rule"
   region = "gcp-${var.region}"
   type   = "ip"
 
   dynamic "rule" {
-    for_each = var.vpn_ips
+    for_each = var.allowed_ips
     iterator = ips
     content {
       source = ips.value
@@ -70,28 +71,9 @@ resource "ec_deployment_traffic_filter" "filter_gcp_psc" {
   }
 }
 
-# Filter rule to allow requests from atlantis
-# This is necessary to enable the Elasticstack Terraform provider to update the Elasticsearch instance.
-# Our users will need this to define Indices and other settings as code (and we use it to create an anonymous access role for non-public Elastic Cloud deployments)
-resource "ec_deployment_traffic_filter" "filter_atlantis_ips" {
-  count = var.make_public ? 0 : 1
-
-  name   = var.project_name == null ? "${var.project_id} - Atlantis Filter Rules" : "${var.project_name} - Atlantis Traffic Filter Rules"
-  region = "gcp-${var.region}"
-  type   = "ip"
-
-  dynamic "rule" {
-    for_each = data.google_compute_address.atlantis_ips
-    iterator = ips
-    content {
-      source = ips.value.address
-    }
-  }
-}
-
 # Elasticsearch role that defines the accesses granted for anonymous access. Provides read access to most resources and edit access to indices.
 resource "elasticstack_elasticsearch_security_role" "anonymous_role" {
-  count = var.make_public ? 0 : 1
+  count = var.make_public || !var.enable_anonymous_access ? 0 : 1
 
   name    = "anonymous_role"
   cluster = ["monitor"]
@@ -108,6 +90,6 @@ resource "elasticstack_elasticsearch_security_role" "anonymous_role" {
   }
 
   depends_on = [
-    ec_deployment_traffic_filter.filter_atlantis_ips
+    ec_deployment_traffic_filter.filter_allowed_ips
   ]
 }

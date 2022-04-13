@@ -2,37 +2,32 @@
 
 ## What does this do?
 
-Creates an Elastic Cloud Deployment with traffic filter rules to only allow traffic from Dapper VPNs and the VPC of the accompanying GCP project.
+Creates an Elastic Cloud Deployment with traffic filter rules to only allow traffic from allowed IPs and the VPC of the accompanying GCP project.
 
 ## How to provision this module?
 
-You can always refer to the [Notion doc](https://www.notion.so/dapperlabs/Deploy-an-Elastic-Cloud-Deployment-7185333a542341ba9faf18da5b9a97c1) for more info.
-
 1. Add the module with every variable you want to set except for the `private_service_connect_id` variable and make/merge a PR with these settings.
-    * If you are deploying to a Gen 2 project, be sure to set the variable `project_name`.
+    * If you are going to make multiple instances of this module in the same GCP project/region, be sure to set the variable `project_name` to differentiate resources in both GCP and Elastic Cloud.
     * If you want to make the deployment publicly accessible, set `make_public` to true.
-    * The variable vpn_ips can be set to `local.vpn_ips` in Gen 3 projects and `local.perimeter_81_ips` in Gen 2 projects.
+    * The variable allowed_ips should be set to a map where the values are all IP addresses/CIDR ranges that should be granted access to the Deployment. This needs to be set if `make_public` is false (which is the default value).
 2. Follow the steps [here](https://cloud.google.com/vpc/docs/configure-private-service-connect-services#create-endpoint) to create a Private Service Connect endpoint in the proper GCP project.
     * For `target` please select `Published Service` from the radio buttons
     * For `target service` use the corresponding URI from [this](https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-psc.html#ec-private-service-connect-uris) page depending on the region of the project.
-    * For `endpoint name` please use the naming convention `<GCP_PROJECT_NAME>-psc`. ex: `dl-sre-staging-psc`
-    * For `subnetwork` please select `gke` from the dropdown (will probably be the only option)
-    * For `IP address` select `<GCP_PROJECT_NAME>-psc-address` from the dropdown (will probably be the only option)
+    * For `endpoint name` please use the naming convention `<GCP_PROJECT_NAME>-psc`.
+    * For `subnetwork` please select the subnet where the GKE cluster resides.
+    * For `IP address` select `<GCP_PROJECT_ID>-psc-address` (or `<PROJECT_NAME>-psc-address` if you set the variable `project_name`) from the dropdown.
     * For `service directory` please do NOT choose a namespace as this will place the PSC in the default namespace (which is the desired bahavior)
 3. Once the private service connect is created, grab the PSC Connection ID and update the `private_service_connect_id` variable in the module and raise a second PR with these updates.
 
-### For the End User
-If the deployment is not publicly accessible, then anonymous access (with limited permissions) is enabled and all users will have to do to access the elasticsearch cluster is to curl the endpoint, which is conveniently provided as an output variable. If they have need of greater permissions, or are trying to access a publicly available deployment, then they will need to use the username/password of the cluster to gain access. These are available as outputs as well, however, the password is marked as sensitive and end users will not be able to directly access it.
-
-### Potential Breaking changes
-Currently, the provider (and any user who will define Elasticstack resources in Terraform), need Atlantis to be able to communicate with the Elastic Cloud Deployment. The current set up of this module assumes Atlantis is running on the Gen 2 production cluster. If Atlantis is moved to Gen 3 architecture, this module will need to update the `atlantis_ips` data source to reflect the current list of public IPs that Atlantis can use.
+### Anonymous access
+If the deployment is not publicly accessible and the variable `enable_anonymous_access` is set to true, then anonymous access (with limited permissions) is enabled and all users will have to do to access the elasticsearch cluster is to curl the endpoint, which is conveniently provided as an output variable. If they have need of greater permissions, or are trying to access a publicly available deployment, then they will need to use the username/password of the cluster to gain access. These are available as outputs as well, however, the password is marked as sensitive and end users will not be able to directly access it.
 
 ### Usage Examples
 
 #### Regular Use
 ```hcl
 module "elasticsearch" {
-  source     = "git@github.com:dapperlabs/terraform-modules.git//elasticsearch?ref=<VERSION>"
+  source     = "git@github.com:dapperlabs-platform/terraform-elastic-cloud-gcp.git?ref=<VERSION>"
   project_id = module.project.project_id
   region     = var.default_region
 
@@ -40,12 +35,12 @@ module "elasticsearch" {
 }
 ```
 
-#### Gen 2 Use Example
+#### Deploying multiple times in single environment example
 ```hcl
 module "elasticsearch" {
-  source       = "git@github.com:dapperlabs/terraform-modules.git//elasticsearch?ref=<VERSION>"
+  source       = "git@github.com:dapperlabs-platform/terraform-elastic-cloud-gcp.git?ref=<VERSION>"
   project_id   = module.project.project_id
-  project_name = "nba-staging"
+  project_name = "<PROJECT_NAME>"
   region       = var.default_region
 
   // private_service_connect_id = "<PRIVATE_SERVICE_CONNECT_ID>" # Uncomment this after manually creating Private Service Connect
@@ -55,7 +50,7 @@ module "elasticsearch" {
 #### Custom Elastic Deployment Needs
 ```hcl
 module "elasticsearch" {
-  source     = "git@github.com:dapperlabs/terraform-modules.git//elasticsearch?ref=<VERSION>"
+  source     = "git@github.com:dapperlabs-platform/terraform-elastic-cloud-gcp.git?ref=<VERSION>"
   project_id = module.project.project_id
   region     = var.default_region
 

@@ -39,10 +39,22 @@ variable "make_public" {
   default     = false
 }
 
-variable "vpn_ips" {
-  description = "Map of VPN IPs to allowlist for access to Elastic Cloud deployment. If make_public is false, this variable must be set."
+variable "allowed_ips" {
+  description = "Map of IPs to allowlist for access to Elastic Cloud deployment. If make_public is false, this variable must be set or you will not be able to access the deployment."
   type        = map(string)
   default     = null
+}
+
+variable "vpc_name" {
+  description = "The name of the VPC network of the GKE cluster we want to allow communication from"
+  type        = string
+  default     = "gke-application-cluster-vpc"
+}
+
+variable "enable_anonymous_access" {
+  description = "This will enable users to access the cluster anonymously (i.e. without username/password). Will only be enabled for private deployments."
+  type        = bool
+  default     = false
 }
 
 variable "elastic_topology" {

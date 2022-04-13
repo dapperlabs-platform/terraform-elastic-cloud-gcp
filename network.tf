@@ -1,18 +1,7 @@
-# Atlantis Public IPs for Traffic Filter Rule
-# NOTE: this is for when Atlantis is being run on Gen 2 infra. This will need to be changed when we transition Atlantis to Gen 3
-data "google_compute_address" "atlantis_ips" {
-  count = 14
-
-  name    = "us-east4-production-2%{if count.index == 0}%{else}-${count.index + 1}%{endif}"
-  project = "dapper-ops"
-  region  = "us-east4"
-}
-
-
 # The VPC network
 data "google_compute_network" "network" {
   project = var.project_id
-  name    = "gke-application-cluster-vpc"
+  name    = var.vpc_name
 }
 
 # We need this because the resource doesn't automatically export the IP address for some reason
