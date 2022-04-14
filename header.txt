@@ -1,0 +1,87 @@
+# Elasticsearch
+
+## What does this do?
+
+Creates an Elastic Cloud Deployment with traffic filter rules to only allow traffic from allowed IPs and the VPC of the accompanying GCP project.
+
+## How to provision this module?
+
+1. Add the module with every variable you want to set except for the `private_service_connect_id` variable and make/merge a PR with these settings.
+    * If you are going to make multiple instances of this module in the same GCP project/region, be sure to set the variable `project_name` to differentiate resources in both GCP and Elastic Cloud.
+    * If you want to make the deployment publicly accessible, set `make_public` to true.
+    * The variable allowed_ips should be set to a map where the values are all IP addresses/CIDR ranges that should be granted access to the Deployment. This needs to be set if `make_public` is false (which is the default value).
+2. Follow the steps [here](https://cloud.google.com/vpc/docs/configure-private-service-connect-services#create-endpoint) to create a Private Service Connect endpoint in the proper GCP project.
+    * For `target` please select `Published Service` from the radio buttons
+    * For `target service` use the corresponding URI from [this](https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-psc.html#ec-private-service-connect-uris) page depending on the region of the project.
+    * For `endpoint name` please use the naming convention `<GCP_PROJECT_NAME>-psc`.
+    * For `subnetwork` please select the subnet where the GKE cluster resides.
+    * For `IP address` select `<GCP_PROJECT_ID>-psc-address` (or `<PROJECT_NAME>-psc-address` if you set the variable `project_name`) from the dropdown.
+    * For `service directory` please do NOT choose a namespace as this will place the PSC in the default namespace (which is the desired bahavior)
+3. Once the private service connect is created, grab the PSC Connection ID and update the `private_service_connect_id` variable in the module and raise a second PR with these updates.
+
+### Anonymous access
+If the deployment is not publicly accessible and the variable `enable_anonymous_access` is set to true, then anonymous access (with limited permissions) is enabled and all users will have to do to access the elasticsearch cluster is to curl the endpoint, which is conveniently provided as an output variable. If they have need of greater permissions, or are trying to access a publicly available deployment, then they will need to use the username/password of the cluster to gain access. These are available as outputs as well, however, the password is marked as sensitive and end users will not be able to directly access it.
+
+### Usage Examples
+
+#### Regular Use
+```hcl
+module "elasticsearch" {
+  source     = "git@github.com:dapperlabs-platform/terraform-elastic-cloud-gcp.git?ref=<VERSION>"
+  project_id = module.project.project_id
+  region     = var.default_region
+
+  // private_service_connect_id = "<PRIVATE_SERVICE_CONNECT_ID>" # Uncomment this after manually creating Private Service Connect
+}
+```
+
+#### Deploying multiple times in single environment example
+```hcl
+module "elasticsearch" {
+  source       = "git@github.com:dapperlabs-platform/terraform-elastic-cloud-gcp.git?ref=<VERSION>"
+  project_id   = module.project.project_id
+  project_name = "<PROJECT_NAME>"
+  region       = var.default_region
+
+  // private_service_connect_id = "<PRIVATE_SERVICE_CONNECT_ID>" # Uncomment this after manually creating Private Service Connect
+}
+```
+
+#### Custom Elastic Deployment Needs
+```hcl
+module "elasticsearch" {
+  source     = "git@github.com:dapperlabs-platform/terraform-elastic-cloud-gcp.git?ref=<VERSION>"
+  project_id = module.project.project_id
+  region     = var.default_region
+
+	elastic_topology = [
+    {
+      id         = "hot_content"
+      size       = "16g"
+      zone_count = 6
+      autoscaling = {
+        max_size = "128g"
+      }
+    },
+		{
+      id         = "cold"
+      size       = "1g"
+      zone_count = 2
+      autoscaling = {
+        max_size = "16g"
+      }
+    }
+  ]
+
+  // private_service_connect_id = "<PRIVATE_SERVICE_CONNECT_ID>" # Uncomment this after manually creating Private Service Connect
+}
+```
+
+## Updating this module
+`make` updates the `README.md` file based on Terraform changes.
+
+## Requires
+
+1. `terraform` [Download](https://www.terraform.io/downloads.html) [Brew](https://formulae.brew.sh/formula/terraform)
+2. `terraform-docs` to update the README. [Download](https://github.com/terraform-docs/terraform-docs) [Brew](https://formulae.brew.sh/formula/terraform-docs)
+3. `make` to update the README. [Download](https://www.gnu.org/software/make/)
