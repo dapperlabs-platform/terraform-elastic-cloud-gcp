@@ -31,6 +31,8 @@ module "elasticsearch" {
   project_id = module.project.project_id
   region     = var.default_region
 
+  allowed_ips = <MAP_OF_IPS> # A map object where the values in the key:value pairs are IPs or CIDR ranges
+
   // private_service_connect_id = "<PRIVATE_SERVICE_CONNECT_ID>" # Uncomment this after manually creating Private Service Connect
 }
 ```
@@ -43,6 +45,8 @@ module "elasticsearch" {
   project_name = "<PROJECT_NAME>"
   region       = var.default_region
 
+  allowed_ips = <MAP_OF_IPS> # A map object where the values in the key:value pairs are IPs or CIDR ranges
+
   // private_service_connect_id = "<PRIVATE_SERVICE_CONNECT_ID>" # Uncomment this after manually creating Private Service Connect
 }
 ```
@@ -54,7 +58,9 @@ module "elasticsearch" {
   project_id = module.project.project_id
   region     = var.default_region
 
-	elastic_topology = [
+  allowed_ips = <MAP_OF_IPS> # A map object where the values in the key:value pairs are IPs or CIDR ranges
+
+  elastic_topology = [
     {
       id         = "hot_content"
       size       = "16g"
@@ -63,7 +69,7 @@ module "elasticsearch" {
         max_size = "128g"
       }
     },
-		{
+    {
       id         = "cold"
       size       = "1g"
       zone_count = 2
