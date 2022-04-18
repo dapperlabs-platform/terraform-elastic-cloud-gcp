@@ -2,7 +2,7 @@
 
 ## What does this do?
 
-Creates an Elastic Cloud Deployment with traffic filter rules to only allow traffic from allowed IPs and the VPC of the accompanying GCP project.
+Creates an Elastic Cloud Deployment. By default, it includes traffic filter rules to only allow traffic from allowed IPs and the VPC of the accompanying GCP project.
 
 ## How to provision this module?
 
@@ -98,8 +98,8 @@ module "elasticsearch" {
 |------|---------|
 | <a name="requirement_ec"></a> [ec](#requirement\_ec) | ~> 0.4.0 |
 | <a name="requirement_elasticstack"></a> [elasticstack](#requirement\_elasticstack) | ~> 0.3.3 |
-| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 4.0.0 |
-| <a name="requirement_google-beta"></a> [google-beta](#requirement\_google-beta) | ~> 4.0.0 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | ~> 4.0 |
+| <a name="requirement_google-beta"></a> [google-beta](#requirement\_google-beta) | ~> 4.0 |
 
 ## Providers
 
@@ -107,8 +107,8 @@ module "elasticsearch" {
 |------|---------|
 | <a name="provider_ec"></a> [ec](#provider\_ec) | ~> 0.4.0 |
 | <a name="provider_elasticstack"></a> [elasticstack](#provider\_elasticstack) | ~> 0.3.3 |
-| <a name="provider_google"></a> [google](#provider\_google) | ~> 4.0.0 |
-| <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | ~> 4.0.0 |
+| <a name="provider_google"></a> [google](#provider\_google) | ~> 4.0 |
+| <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | ~> 4.0 |
 
 ## Modules
 
