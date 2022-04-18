@@ -35,8 +35,6 @@ resource "google_dns_record_set" "psc_managed_zone_record" {
 }
 
 resource "google_dns_managed_zone" "psc_managed_zone" {
-  provider = google-beta
-
   name        = var.project_name == null ? "${var.project_id}-private-zone" : "${var.project_name}-private-zone"
   project     = var.project_id
   dns_name    = local.elastic_private_dns[var.region]

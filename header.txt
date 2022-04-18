@@ -2,7 +2,7 @@
 
 ## What does this do?
 
-Creates an Elastic Cloud Deployment with traffic filter rules to only allow traffic from allowed IPs and the VPC of the accompanying GCP project.
+Creates an Elastic Cloud Deployment. By default, it includes traffic filter rules to only allow traffic from allowed IPs and the VPC of the accompanying GCP project.
 
 ## How to provision this module?
 
