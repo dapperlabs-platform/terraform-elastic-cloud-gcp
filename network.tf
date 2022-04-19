@@ -53,7 +53,7 @@ resource "google_dns_managed_zone" "psc_managed_zone" {
 
   private_visibility_config {
     networks {
-      network_url = data.google_compute_network[0].network.self_link
+      network_url = data.google_compute_network.network[0].self_link
     }
   }
 }
