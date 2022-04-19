@@ -10,6 +10,7 @@ Creates an Elastic Cloud Deployment. By default, it includes traffic filter rule
     * If you are going to make multiple instances of this module in the same GCP project/region, be sure to set the variable `project_name` to differentiate resources in both GCP and Elastic Cloud.
     * If you want to make the deployment publicly accessible, set `make_public` to true.
     * The variable allowed\_ips should be set to a map where the values are all IP addresses/CIDR ranges that should be granted access to the Deployment. This needs to be set if `make_public` is false (which is the default value).
+    * If you do not need to use a Private Service Connect endpoint, you can set `disable_psc` to true. If you do this, you do not need to follow steps 2 and 3.
 2. Follow the steps [here](https://cloud.google.com/vpc/docs/configure-private-service-connect-services#create-endpoint) to create a Private Service Connect endpoint in the proper GCP project.
     * For `target` please select `Published Service` from the radio buttons
     * For `target service` use the corresponding URI from [this](https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-psc.html#ec-private-service-connect-uris) page depending on the region of the project.
@@ -108,7 +109,6 @@ module "elasticsearch" {
 | <a name="provider_ec"></a> [ec](#provider\_ec) | ~> 0.4.0 |
 | <a name="provider_elasticstack"></a> [elasticstack](#provider\_elasticstack) | ~> 0.3.3 |
 | <a name="provider_google"></a> [google](#provider\_google) | ~> 4.0 |
-| <a name="provider_google-beta"></a> [google-beta](#provider\_google-beta) | ~> 4.0 |
 
 ## Modules
 
@@ -122,8 +122,8 @@ No modules.
 | [ec_deployment_traffic_filter.filter_allowed_ips](https://registry.terraform.io/providers/elastic/ec/latest/docs/resources/deployment_traffic_filter) | resource |
 | [ec_deployment_traffic_filter.filter_gcp_psc](https://registry.terraform.io/providers/elastic/ec/latest/docs/resources/deployment_traffic_filter) | resource |
 | [elasticstack_elasticsearch_security_role.anonymous_role](https://registry.terraform.io/providers/elastic/elasticstack/latest/docs/resources/elasticsearch_security_role) | resource |
-| [google-beta_google_dns_managed_zone.psc_managed_zone](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/google_dns_managed_zone) | resource |
 | [google_compute_address.psc_address](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_address) | resource |
+| [google_dns_managed_zone.psc_managed_zone](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_managed_zone) | resource |
 | [google_dns_record_set.psc_managed_zone_record](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_record_set) | resource |
 | [google_compute_address.psc_address](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_address) | data source |
 | [google_compute_network.network](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/compute_network) | data source |
@@ -133,6 +133,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_allowed_ips"></a> [allowed\_ips](#input\_allowed\_ips) | Map of IPs to allowlist for access to Elastic Cloud deployment. If make\_public is false, this variable must be set or you will not be able to access the deployment. | `map(string)` | `null` | no |
+| <a name="input_disable_psc"></a> [disable\_psc](#input\_disable\_psc) | This will disable the creation of the networking resources required to provide authentication to Elastic Cloud via GCP Private Service connect | `bool` | `false` | no |
 | <a name="input_elastic_deployment_template_name"></a> [elastic\_deployment\_template\_name](#input\_elastic\_deployment\_template\_name) | The instance type to use in the deployment. Go to https://www.elastic.co/guide/en/cloud/current/ec-regions-templates-instances.html for a list of options. | `string` | `"gcp-general-purpose"` | no |
 | <a name="input_elastic_topology"></a> [elastic\_topology](#input\_elastic\_topology) | Configuration settings list for desired Elasticsearch topologies. See https://registry.terraform.io/providers/elastic/ec/latest/docs/resources/ec_deployment#topology for definitions of topology settings. | <pre>list(object({<br>    id         = string<br>    size       = string<br>    zone_count = string<br>    autoscaling = object({<br>      max_size = string<br>    })<br>  }))</pre> | <pre>[<br>  {<br>    "autoscaling": {<br>      "max_size": "64g"<br>    },<br>    "id": "hot_content",<br>    "size": "4g",<br>    "zone_count": 3<br>  }<br>]</pre> | no |
 | <a name="input_elastic_version"></a> [elastic\_version](#input\_elastic\_version) | The version of Elasticsearch to use | `string` | `"8.1.2"` | no |
