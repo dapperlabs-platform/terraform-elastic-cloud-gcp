@@ -10,6 +10,7 @@ Creates an Elastic Cloud Deployment. By default, it includes traffic filter rule
     * If you are going to make multiple instances of this module in the same GCP project/region, be sure to set the variable `project_name` to differentiate resources in both GCP and Elastic Cloud.
     * If you want to make the deployment publicly accessible, set `make_public` to true.
     * The variable allowed_ips should be set to a map where the values are all IP addresses/CIDR ranges that should be granted access to the Deployment. This needs to be set if `make_public` is false (which is the default value).
+    * If you do not need to use a Private Service Connect endpoint, you can set `disable_psc` to true. If you do this, you do not need to follow steps 2 and 3.
 2. Follow the steps [here](https://cloud.google.com/vpc/docs/configure-private-service-connect-services#create-endpoint) to create a Private Service Connect endpoint in the proper GCP project.
     * For `target` please select `Published Service` from the radio buttons
     * For `target service` use the corresponding URI from [this](https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-psc.html#ec-private-service-connect-uris) page depending on the region of the project.

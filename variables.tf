@@ -87,3 +87,9 @@ variable "kibana_topology" {
   }))
   default = []
 }
+
+variable "disable_psc" {
+  description = "This will disable the creation of the networking resources required to provide authentication to Elastic Cloud via GCP Private Service connect"
+  type        = bool
+  default     = false
+}
