@@ -144,6 +144,7 @@ No modules.
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The GCP project id. | `string` | n/a | yes |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | A name variable used to name the resources. Should only be set if deploying to a Gen 2 project | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | Region for the deployment | `string` | `"us-west1"` | no |
+| <a name="input_request_id"></a> [request\_id](#input\_request\_id) | This variable is sometimes needed when the Elastic API encounters an error. Only set this if told to by the output of a Terraform apply | `string` | `null` | no |
 | <a name="input_vpc_name"></a> [vpc\_name](#input\_vpc\_name) | The name of the VPC network of the GKE cluster we want to allow communication from | `string` | `"gke-application-cluster-vpc"` | no |
 
 ## Outputs
