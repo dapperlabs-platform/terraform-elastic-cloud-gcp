@@ -4,6 +4,7 @@ resource "ec_deployment" "elastic_cloud_deployment" {
   region                 = "gcp-${var.region}"
   version                = var.elastic_version
   deployment_template_id = var.elastic_deployment_template_name
+  request_id             = var.request_id
 
   traffic_filter = var.make_public ? null : [
     ec_deployment_traffic_filter.filter_allowed_ips[0].id,

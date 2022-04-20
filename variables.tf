@@ -93,3 +93,9 @@ variable "disable_psc" {
   type        = bool
   default     = false
 }
+
+variable "request_id" {
+  description = "This variable is sometimes needed when the Elastic API encounters an error. Only set this if told to by the output of a Terraform apply"
+  type        = string
+  default     = null
+}
