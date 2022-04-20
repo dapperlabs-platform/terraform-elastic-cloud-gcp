@@ -15,10 +15,19 @@ variable "region" {
   default     = "us-west1"
 }
 
-variable "elastic_version" {
-  description = "The version of Elasticsearch to use"
+variable "elastic_version_regex" {
+  description = <<EOF
+    The regex of the version of Elasticsearch to use. This will be used in a data object that queries available versions on Elastic
+    Cloud and will return the most recent version that matches the constraints. This will only be used on the first apply and then
+    the version will be locked in place so as to not cause unexpected cluster upgrades.
+
+    CAUTION: Elastic Cloud only supports 3 versions at any one time: the version, the latest version of the previous minor version, and
+    the latest version of the previous major version. The default is `latest` as this is the safeest way to ensure you will always deploy
+    with a supported version of Elasticsearch. But you can enter in a regex if you have a specific version you need, just keep in mind that
+    very few versions are supported.
+    EOF
   type        = string
-  default     = "8.1.2"
+  default     = "latest"
 }
 
 variable "elastic_deployment_template_name" {

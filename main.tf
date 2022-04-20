@@ -1,8 +1,15 @@
+# Taint this resource to update the cluster to a new version
+data "ec_stack" "version" {
+  version_regex = var.elastic_version_regex
+  region        = "gcp-${var.region}"
+  lock          = true # locks the version in place so as to not cause unecessary updates.
+}
+
 resource "ec_deployment" "elastic_cloud_deployment" {
   name = var.project_name == null ? "${var.project_id}_deployment" : "${var.project_name}_deployment"
 
   region                 = "gcp-${var.region}"
-  version                = var.elastic_version
+  version                = data.ec_stack.version.version
   deployment_template_id = var.elastic_deployment_template_name
   request_id             = var.request_id
 
