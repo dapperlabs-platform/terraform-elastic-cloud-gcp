@@ -36,6 +36,9 @@ resource "ec_deployment" "elastic_cloud_deployment" {
         user_settings_yaml = file("${path.module}/elasticsearch.yml")
       }
     }
+    // If a topology is set, this ensures autoscaling will be turned off since turning on autoscaling when a topology is set causes
+    // issues with the Elastic Cloud provider. Issue: https://github.com/elastic/terraform-provider-ec/issues/467
+    autoscale = var.elastic_autoscaling && length(var.elastic_topology) == 0
   }
 
   kibana {
