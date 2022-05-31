@@ -28,6 +28,16 @@ resource "google_compute_address" "psc_address" {
   subnetwork   = data.google_compute_network.network[0].subnetworks_self_links[0]
 }
 
+resource "google_compute_forwarding_rule" "psc_forwarding_rule" {
+  name                  = var.project_name == null ? "${var.project_id}-psc-forwarding-rule" : "${var.project_name}-psc-forwarding-rule"
+  load_balancing_scheme = ""
+  region                = var.region
+  project               = var.project_id
+  ip_address            = google_compute_address.psc_address[0].id
+  target                = local.service_attachment_uris[var.region]
+  network               = data.google_compute_network.network[0].id
+}
+
 # DNS Management
 resource "google_dns_record_set" "psc_managed_zone_record" {
   count = var.disable_psc ? 0 : 1
