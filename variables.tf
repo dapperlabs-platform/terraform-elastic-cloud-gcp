@@ -66,6 +66,12 @@ variable "enable_anonymous_access" {
   default     = false
 }
 
+variable "elastic_autoscaling" {
+  description = "This will enable autoscaling on the elasticsearch instances. If elastic_toplogy is set, this should not be set to true"
+  type        = bool
+  default     = true
+}
+
 variable "elastic_topology" {
   description = "Configuration settings list for desired Elasticsearch topologies. See https://registry.terraform.io/providers/elastic/ec/latest/docs/resources/ec_deployment#topology for definitions of topology settings."
   type = list(object({
@@ -76,16 +82,7 @@ variable "elastic_topology" {
       max_size = string
     })
   }))
-  default = [
-    {
-      id         = "hot_content"
-      size       = "4g"
-      zone_count = 3
-      autoscaling = {
-        max_size = "64g"
-      }
-    }
-  ]
+  default = []
 }
 
 variable "kibana_topology" {
