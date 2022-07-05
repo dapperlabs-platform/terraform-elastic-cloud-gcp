@@ -29,6 +29,8 @@ resource "google_compute_address" "psc_address" {
 }
 
 resource "google_compute_forwarding_rule" "psc_forwarding_rule" {
+  count = var.disable_psc ? 0 : 1
+
   name                  = var.project_name == null ? "${var.project_id}-psc-forwarding-rule" : "${var.project_name}-psc-forwarding-rule"
   load_balancing_scheme = ""
   region                = var.region
