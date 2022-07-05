@@ -50,6 +50,12 @@ resource "ec_deployment" "elastic_cloud_deployment" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      version,
+    ]
+  }
 }
 
 # Filter rule to allow requests from allowed IPs
