@@ -51,6 +51,13 @@ resource "ec_deployment" "elastic_cloud_deployment" {
     }
   }
 
+  dynamic "observability" {
+    for_each = var.observability_deployment == null ? toset([]) : toset([1])
+    content {
+      deployment_id = var.observability_deployment
+    }
+  }
+
   lifecycle {
     ignore_changes = [
       version,

@@ -105,3 +105,9 @@ variable "request_id" {
   type        = string
   default     = null
 }
+
+variable "observability_deployment" {
+  description = "Cluster id of deployment to send logs to"
+  type        = string
+  default     = null
+}
