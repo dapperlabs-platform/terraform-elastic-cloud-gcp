@@ -14,3 +14,8 @@ output "elasticsearch_https_endpoint" {
 output "kibana_endpoint" {
   value = ec_deployment.elastic_cloud_deployment.kibana[0].https_endpoint
 }
+
+output "additional_user_passwords" {
+  value     = { for k, v in var.additional_users : k => random_password.additional_user_passwords[k].result }
+  sensitive = true
+}

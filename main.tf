@@ -117,3 +117,29 @@ resource "elasticstack_elasticsearch_security_role" "anonymous_role" {
     ec_deployment_traffic_filter.filter_allowed_ips
   ]
 }
+
+resource "random_password" "additional_user_passwords" {
+  for_each = toset(keys(var.additional_users))
+  length   = 42
+  upper    = true
+  lower    = true
+  numeric  = true
+  special  = false
+}
+
+resource "elasticstack_elasticsearch_security_user" "additional_users" {
+  for_each = var.additional_users
+
+  username = each.key
+  password = random_password.additional_user_passwords[each.key].result
+  roles    = each.value
+  elasticsearch_connection {
+    endpoints = ["${ec_deployment.elastic_cloud_deployment.elasticsearch[0].https_endpoint}"]
+    username  = ec_deployment.elastic_cloud_deployment.elasticsearch_username
+    password  = ec_deployment.elastic_cloud_deployment.elasticsearch_password
+  }
+
+  depends_on = [
+    ec_deployment_traffic_filter.filter_allowed_ips
+  ]
+}

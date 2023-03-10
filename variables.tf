@@ -111,3 +111,9 @@ variable "observability_deployment" {
   type        = string
   default     = null
 }
+
+variable "additional_users" {
+  description = "Map of username=[roles...] to be added to the cluster"
+  type        = map(list(string))
+  default     = {}
+}
